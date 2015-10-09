@@ -18,7 +18,7 @@ setopt HIST_VERIFY
 #remove beeps
 setopt NO_BEEP
 
-PROMPT="[%D{%H:%M:%S}]%K{red}%(?..%?)%k %K{cyan}%B%n@%m%b%k %~\$ $prompt_newline%% "
+PROMPT="[%D{%H:%M:%S}]%K{red}%(?..%?)%k %F{cyan}%B%n@%m%b%f %~\$ $prompt_newline%% "
 
 # stolen from arch wiki
 # https://wiki.archlinux.org/index.php/Tmux#Start_tmux_on_every_shell_login
@@ -39,4 +39,11 @@ if [ -d "$HOME/.local/bin" ]; then
   PATH="$HOME/.local/bin:$PATH"
 fi
 
-PATH="$PATH:$GOPATH/bin"
+if [ -d "$GOPATH/bin" ]; then
+  PATH="$PATH:$GOPATH/bin"
+fi
+
+if [ -d "$HOME/bin" ]; then
+  PATH="$PATH:$HOME/bin"
+fi
+
