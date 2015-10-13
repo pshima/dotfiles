@@ -24,11 +24,11 @@ PROMPT="[%D{%H:%M:%S}]%K{red}%(?..%?)%k %F{cyan}%B%n@%m%b%f %~\$ $prompt_newline
 # https://wiki.archlinux.org/index.php/Tmux#Start_tmux_on_every_shell_login
 if which tmux >/dev/null 2>&1; then
     # if no session is started, start a new session
-    test -z ${TMUX} && tmux
+    test -z ${TMUX} && tmux new -s main
 
     # when quitting tmux, try to attach
     while test -z ${TMUX}; do
-        tmux attach || break
+        tmux attach -t main || break
     done
 fi
 
