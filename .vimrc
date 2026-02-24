@@ -1,21 +1,15 @@
-"vundle setup
+" vim-plug setup
 set nocompatible
 filetype off
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+call plug#begin('~/.vim/plugged')
 
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'fatih/vim-go'
+Plug 'fatih/vim-go'
 
-call vundle#end()
+call plug#end()
 filetype plugin indent on
-
-" go linter
-set rtp+=$GOPATH/src/github.com/golang/lint/misc/vim
 
 set history=500
 set number
-set nowrap
 
 filetype plugin on
 filetype indent on
@@ -73,10 +67,3 @@ function! HasPaste()
     endif
     return ''
 endfunction
-
-" Automatically run go linter
-autocmd BufWritePost,FileWritePost *.go execute 'Lint' | cwindow
-
-"leave powerline out for now
-"set rtp+=$HOME/.local/lib/python2.7/site-packages/powerline/bindings/vim
-"set t_Co=256
