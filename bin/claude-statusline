@@ -1,21 +1,36 @@
 #!/usr/bin/env bash
-# Claude Code status line: "[tmux-window] ~/dir  branch  ·  model  ·  ctx NN%"
+# Claude Code status line:
+#   "[tmux-window] ~/dir  branch  ·  model  ·  ctx NN%  ·  account  ·  5h NN%  wk NN%"
 input="$(cat)"
 
+# Fields are split on \x1f, not tab: bash collapses runs of tabs, which would shift
+# every later field when one is empty (e.g. rate_limits before the first response).
+claude_json="${CLAUDE_CONFIG_DIR:-$HOME}/.claude.json"
 if command -v jq >/dev/null 2>&1; then
-  IFS=$'\t' read -r dir model pct < <(printf '%s' "$input" | jq -r '
+  IFS=$'\x1f' read -r dir model pct five week < <(printf '%s' "$input" | jq -r '
     [(.workspace.current_dir // .cwd // ""),
      (.model.display_name // ""),
-     ((.context_window.used_percentage // .context_window.percent_used // "") | tostring)]
-    | @tsv')
+     (.context_window.used_percentage // .context_window.percent_used // ""),
+     (.rate_limits.five_hour.used_percentage // ""),
+     (.rate_limits.seven_day.used_percentage // "")]
+    | map(tostring) | join("\u001f")')
+  account="$(jq -r '.oauthAccount.emailAddress // empty' "$claude_json" 2>/dev/null)"
 else
-  IFS=$'\t' read -r dir model pct < <(printf '%s' "$input" | python3 -c '
+  IFS=$'\x1f' read -r dir model pct five week account < <(printf '%s' "$input" | python3 -c '
 import json,sys
 d=json.load(sys.stdin)
 cw=d.get("context_window") or {}
+rl=d.get("rate_limits") or {}
+try:
+    acct=json.load(open(sys.argv[1])).get("oauthAccount",{}).get("emailAddress","")
+except Exception:
+    acct=""
 print((d.get("workspace") or {}).get("current_dir") or d.get("cwd") or "",
       (d.get("model") or {}).get("display_name",""),
-      cw.get("used_percentage", cw.get("percent_used","")), sep="\t")')
+      cw.get("used_percentage", cw.get("percent_used","")),
+      (rl.get("five_hour") or {}).get("used_percentage",""),
+      (rl.get("seven_day") or {}).get("used_percentage",""),
+      acct, sep="\x1f")' "$claude_json")
 fi
 
 win=""
@@ -37,6 +52,11 @@ out+="$short"
 [ -n "$branch" ] && out+="  $branch"
 [ -n "$model" ] && out+="  ·  $model"
 [ -n "$pct" ] && [ "$pct" != "null" ] && out+="  ·  ctx ${pct%.*}%"
+[ -n "$account" ] && out+="  ·  $account"
+usage=""
+[ -n "$five" ] && usage+="5h ${five%.*}%"
+[ -n "$week" ] && usage+="${usage:+  }wk ${week%.*}%"
+[ -n "$usage" ] && out+="  ·  $usage"
 # Draw a rounded box sized to the content. Border is dimmed; content keeps default color.
 width=${#out}
 line=""
