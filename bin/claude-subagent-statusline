@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Claude Code subagent rows: "name · description · model · ctx NN% · 1m05s"
+# Reads {columns, tasks:[...]} on stdin, writes one {"id","content"} JSON line per row.
+# Prints nothing on any failure, so Claude Code falls back to its default rows.
+command -v jq >/dev/null 2>&1 || exit 0
+
+jq -c --argjson now "$(date +%s)" '
+  def short_model: sub("^claude-"; "") | sub("-[0-9]{8}$"; "");
+  def elapsed:
+    if type == "number" then
+      (if . > 1e12 then ./1000 else . end | floor) as $start
+      | ($now - $start) as $s
+      | if $s < 0 then empty
+        elif $s < 60 then "\($s)s"
+        else "\($s/60|floor)m\($s%60|tostring|if length < 2 then "0"+. else . end)s" end
+    else empty end;
+
+  (.columns // 80) as $cols
+  | .tasks[]?
+  | . as $t
+  | [ ($t.model // empty | short_model),
+      (if ($t.tokenCount != null and ($t.contextWindowSize // 0) > 0)
+       then "ctx \(($t.tokenCount * 100 / $t.contextWindowSize) | floor)%" else empty end),
+      ($t.startTime | elapsed)
+    ] as $meta
+  | ($t.label // $t.name // $t.type // "agent") as $name
+  | ($meta | join("  ·  ")) as $tail
+  | ($cols - ($name|length) - ($tail|length) - 10) as $room
+  | ($t.description // "") as $d
+  | (if $room < 8 or ($d|length) == 0 then ""
+     elif ($d|length) > $room then "  ·  " + $d[0:$room-1] + "…"
+     else "  ·  " + $d end) as $desc
+  | {id: $t.id, content: ($name + $desc + (if $tail == "" then "" else "  ·  " + $tail end))}
+' 2>/dev/null
+exit 0

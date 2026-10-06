@@ -36,10 +36,6 @@ if [ -d "$HOME/bin" ]; then
   PATH="$PATH:$HOME/bin"
 fi
 
-if [ "$SSH_AUTH_SOCK" = "" -a -x /usr/bin/ssh-agent ]; then
-  eval `ssh-agent`
-fi
-
 # --- Zsh plugins (brew-installed) ---
 if [ -d "$(brew --prefix 2>/dev/null)/share/zsh-autosuggestions" ]; then
   source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"

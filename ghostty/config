@@ -18,14 +18,14 @@ macos-option-as-alt = true
 scrollback-limit = 10000000
 mouse-hide-while-typing = true
 copy-on-select = false
-clipboard-read = allow
+clipboard-read = ask
 clipboard-write = allow
 confirm-close-surface = false
 focus-follows-mouse = true
 
 # Shell integration
 shell-integration = detect
-shell-integration-features = cursor,title,sudo,ssh-env
+shell-integration-features = cursor,title,sudo,ssh-env,ssh-terminfo
 
 # Unfocused split dimming
 unfocused-split-opacity = 0.7

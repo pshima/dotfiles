@@ -1,3 +1,8 @@
+" Vim skips its built-in defaults.vim when a .vimrc exists; load it explicitly
+" (incsearch, scrolloff, showcmd, wildmenu, sane backspace, etc.)
+unlet! skip_defaults_vim
+source $VIMRUNTIME/defaults.vim
+
 " Auto-install vim-plug if not found
 let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
 if empty(glob(data_dir . '/autoload/plug.vim'))
@@ -5,24 +10,17 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
-" vim-plug setup
-set nocompatible
-filetype off
+" vim-plug setup (plug#end turns on filetype plugin indent and syntax)
 call plug#begin('~/.vim/plugged')
 
 Plug 'fatih/vim-go'
 
 call plug#end()
-filetype plugin indent on
 
 set history=500
 set number
 
-filetype plugin on
-filetype indent on
 set autoread
-
-command W w !sudo tee % > /dev/null
 
 set cmdheight=2
 
@@ -39,9 +37,7 @@ set lazyredraw
 set noerrorbells
 set novisualbell
 set t_vb=
-set tm=500
-
-syntax enable
+set timeoutlen=500
 
 try
     colorscheme desert
@@ -50,7 +46,7 @@ endtry
 
 set encoding=utf8
 
-set ffs=unix,dos,mac
+set fileformats=unix,dos
 
 set expandtab
 
@@ -65,12 +61,4 @@ set wrap
 
 set laststatus=2
 
-set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l
-
-" Returns true if paste mode is enabled
-function! HasPaste()
-    if &paste
-        return 'PASTE MODE  '
-    endif
-    return ''
-endfunction
+set statusline=\ %F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l

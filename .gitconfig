@@ -7,7 +7,7 @@
     line-numbers = true
     side-by-side = true
 [merge]
-    conflictstyle = diff3
+    conflictstyle = zdiff3
 [user]
     name = Pete Shima
     email = me@peteshima.com
@@ -17,3 +17,19 @@
 [credential "https://gist.github.com"]
     helper =
     helper = !/opt/homebrew/bin/gh auth git-credential
+[init]
+    defaultBranch = main
+[push]
+    autoSetupRemote = true
+[pull]
+    rebase = true
+[rebase]
+    autoStash = true
+[fetch]
+    prune = true
+[rerere]
+    enabled = true
+[diff]
+    algorithm = histogram
+[branch]
+    sort = -committerdate
