@@ -4,7 +4,7 @@ font-size = 14
 font-thicken = true
 
 # Theme
-theme = catppuccin-mocha
+theme = Catppuccin Mocha
 
 # Window
 window-padding-x = 4

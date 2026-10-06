@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Claude Code status line: "[tmux-window] ~/dir  branch  ·  model  ·  ctx NN%"
+input="$(cat)"
+
+if command -v jq >/dev/null 2>&1; then
+  IFS=$'\t' read -r dir model pct < <(printf '%s' "$input" | jq -r '
+    [(.workspace.current_dir // .cwd // ""),
+     (.model.display_name // ""),
+     ((.context_window.used_percentage // .context_window.percent_used // "") | tostring)]
+    | @tsv')
+else
+  IFS=$'\t' read -r dir model pct < <(printf '%s' "$input" | python3 -c '
+import json,sys
+d=json.load(sys.stdin)
+cw=d.get("context_window") or {}
+print((d.get("workspace") or {}).get("current_dir") or d.get("cwd") or "",
+      (d.get("model") or {}).get("display_name",""),
+      cw.get("used_percentage", cw.get("percent_used","")), sep="\t")')
+fi
+
+win=""
+if [ -n "$TMUX_PANE" ] && command -v tmux >/dev/null 2>&1; then
+  win="$(tmux display-message -p -t "$TMUX_PANE" '#I' 2>/dev/null)"
+fi
+
+branch=""
+if [ -n "$dir" ]; then
+  branch="$(git -C "$dir" rev-parse --abbrev-ref HEAD 2>/dev/null)"
+fi
+
+short="$dir"
+case "$dir" in "$HOME"*) short="~${dir#"$HOME"}" ;; esac
+
+out=""
+[ -n "$win" ] && out+="[$win] "
+out+="$short"
+[ -n "$branch" ] && out+="  $branch"
+[ -n "$model" ] && out+="  ·  $model"
+[ -n "$pct" ] && [ "$pct" != "null" ] && out+="  ·  ctx ${pct%.*}%"
+# Draw a rounded box sized to the content. Border is dimmed; content keeps default color.
+width=${#out}
+line=""
+for ((i=0; i<width+2; i++)); do line+="─"; done
+dim=$'\e[2m'; reset=$'\e[0m'
+printf '%s╭%s╮%s\n' "$dim" "$line" "$reset"
+printf '%s│%s %s %s│%s\n' "$dim" "$reset" "$out" "$dim" "$reset"
+printf '%s╰%s╯%s\n' "$dim" "$line" "$reset"

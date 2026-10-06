@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Flip the tmux window option @agent so the status bar can color the tab.
+# Usage: agent-tmux-state busy|waiting|clear
+# Called from Claude Code / Codex hooks; hook JSON arrives on stdin and is ignored.
+cat >/dev/null 2>&1 || true
+
+state="${1:-}"
+[ -n "$TMUX_PANE" ] || exit 0
+command -v tmux >/dev/null 2>&1 || exit 0
+
+case "$state" in
+  busy|waiting)
+    tmux set-option -w -t "$TMUX_PANE" @agent "$state" 2>/dev/null
+    ;;
+  clear)
+    tmux set-option -w -t "$TMUX_PANE" -u @agent 2>/dev/null
+    ;;
+  *)
+    exit 0
+    ;;
+esac
+
+tmux refresh-client -S 2>/dev/null
+exit 0

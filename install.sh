@@ -2,7 +2,7 @@
 set -e
 
 today=$(date +%m.%d.%Y)
-DOTFILES_DIR="$HOME/dotfiles"
+DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # --- Symlink dotfiles ---
 symlinks=(.tmux.conf .vimrc .zshrc .gitconfig)
@@ -30,6 +30,20 @@ if [ -L "$HOME/.config/ghostty/config" ]; then
   unlink "$HOME/.config/ghostty/config"
 fi
 ln -s "${DOTFILES_DIR}/ghostty/config" "$HOME/.config/ghostty/config"
+
+# --- Codex hooks symlink ---
+echo "Symlinking codex/hooks.json -> ~/.codex/hooks.json"
+mkdir -p "$HOME/.codex"
+if [ -f "$HOME/.codex/hooks.json" ] && [ ! -L "$HOME/.codex/hooks.json" ]; then
+  echo "$HOME/.codex/hooks.json exists, backing up"
+  mv "$HOME/.codex/hooks.json" "$HOME/.codex/hooks.json.${today}"
+fi
+if [ -L "$HOME/.codex/hooks.json" ]; then
+  unlink "$HOME/.codex/hooks.json"
+fi
+ln -s "${DOTFILES_DIR}/codex/hooks.json" "$HOME/.codex/hooks.json"
+
+chmod +x "${DOTFILES_DIR}"/bin/*
 
 # --- Shell check ---
 if [[ $SHELL != *"zsh"* ]]; then
@@ -61,11 +75,11 @@ fi
 if command -v brew &>/dev/null; then
   echo ""
   echo "Installing brew dependencies..."
-  brew install fzf zoxide eza bat ripgrep fd git-delta zsh-autosuggestions zsh-syntax-highlighting 2>/dev/null || true
+  brew install fzf zoxide eza bat ripgrep fd git-delta jq zsh-autosuggestions zsh-syntax-highlighting 2>/dev/null || true
 else
   echo ""
   echo "Homebrew not found. Install these manually:"
-  echo "  brew install fzf zoxide eza bat ripgrep fd git-delta zsh-autosuggestions zsh-syntax-highlighting"
+  echo "  brew install fzf zoxide eza bat ripgrep fd git-delta jq zsh-autosuggestions zsh-syntax-highlighting"
 fi
 
 echo ""
@@ -73,3 +87,4 @@ echo "Done! Next steps:"
 echo "  1. Open Ghostty (install JetBrains Mono font if needed: brew install --cask font-jetbrains-mono)"
 echo "  2. Start tmux and press prefix + I to install tmux plugins"
 echo "  3. Restart your shell to pick up zsh changes"
+echo "  4. Merge claude/settings-snippet.json into ~/.claude/settings.json (hooks + statusLine)"

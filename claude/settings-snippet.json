@@ -1,0 +1,21 @@
+{
+  "statusLine": { "type": "command", "command": "~/workplace/dotfiles/bin/claude-statusline" },
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "~/workplace/dotfiles/bin/agent-tmux-state busy" } ] }
+    ],
+    "PostToolUse": [
+      { "hooks": [ { "type": "command", "command": "~/workplace/dotfiles/bin/agent-tmux-state busy" } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "~/workplace/dotfiles/bin/agent-tmux-state waiting" } ] }
+    ],
+    "Notification": [
+      { "matcher": "permission_prompt|idle_prompt",
+        "hooks": [ { "type": "command", "command": "~/workplace/dotfiles/bin/agent-tmux-state waiting" } ] }
+    ],
+    "SessionEnd": [
+      { "hooks": [ { "type": "command", "command": "~/workplace/dotfiles/bin/agent-tmux-state clear" } ] }
+    ]
+  }
+}

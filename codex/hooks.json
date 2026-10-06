@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "~/workplace/dotfiles/bin/agent-tmux-state busy" } ] }
+    ],
+    "PostToolUse": [
+      { "hooks": [ { "type": "command", "command": "~/workplace/dotfiles/bin/agent-tmux-state busy" } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "~/workplace/dotfiles/bin/agent-tmux-state waiting" } ] }
+    ],
+    "PermissionRequest": [
+      { "hooks": [ { "type": "command", "command": "~/workplace/dotfiles/bin/agent-tmux-state waiting" } ] }
+    ],
+    "SessionEnd": [
+      { "hooks": [ { "type": "command", "command": "~/workplace/dotfiles/bin/agent-tmux-state clear" } ] }
+    ]
+  }
+}

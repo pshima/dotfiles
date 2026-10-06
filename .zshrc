@@ -28,19 +28,12 @@ if which tmux >/dev/null 2>&1; then
     test -z ${TMUX} && (tmux attach -t main 2>/dev/null || tmux new -s main)
 fi
 
-#export GOROOT=/usr/lib/go
-#export GOPATH=$HOME/go
-
 if [ -d "$HOME/.local/bin" ]; then
   PATH="$HOME/.local/bin:$PATH"
 fi
 
 if [ -d "$HOME/bin" ]; then
   PATH="$PATH:$HOME/bin"
-fi
-
-if [ -d "$HOME/.cargo/bin" ]; then
-  PATH="$PATH:$HOME/.cargo/bin"
 fi
 
 if [ "$SSH_AUTH_SOCK" = "" -a -x /usr/bin/ssh-agent ]; then
